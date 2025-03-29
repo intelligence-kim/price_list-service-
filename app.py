@@ -34,7 +34,8 @@ def extract_code(product_name):
 
 if encrypted_file and price_file:
     try:
-        df_ledger = decrypt_excel(encrypted_file, "4698")
+        # df_ledger = decrypt_excel(encrypted_file, "4698")
+        df_ledger = pd.read_excel(encrypted_file)
         df_price = read_excel(price_file)
 
         # 상품코드 추출
