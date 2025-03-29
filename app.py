@@ -8,10 +8,11 @@ import re
 st.set_page_config(page_title="총원장 분석기", layout="wide")
 st.title("📊 총원장 & 단가표 분석기")
 
-# 엑셀 파일 업로드
+# 엑셀 파일 업로드 + 암호 입력
 col1, col2 = st.columns(2)
 with col1:
-    encrypted_file = st.file_uploader("🔐 총원장 파일 업로드 (.xlsx, 암호: 4698)", type=["xlsx"])
+    encrypted_file = st.file_uploader("🔐 총원장 파일 업로드 (.xlsx)", type=["xlsx"])
+    password_input = st.text_input("엑셀 비밀번호 입력", type="password")
 with col2:
     price_file = st.file_uploader("💰 도매 단가표 업로드 (.xlsx)", type=["xlsx"])
 
@@ -32,9 +33,9 @@ def extract_code(product_name):
     match = re.search(r"\((.*?)\)", str(product_name))
     return match.group(1) if match else None
 
-if encrypted_file and price_file:
+if encrypted_file and price_file and password_input:
     try:
-        df_ledger = decrypt_excel(encrypted_file, "4698")
+        df_ledger = decrypt_excel(encrypted_file, password_input)
         df_price = read_excel(price_file)
 
         # 상품코드 추출
@@ -66,6 +67,6 @@ if encrypted_file and price_file:
             st.dataframe(result, use_container_width=True, height=400)
 
     except Exception as e:
-        st.error(f"오류 발생: {e}")
+        st.error(f"❌ 오류 발생: {e}")
 else:
-    st.info("왼쪽 상단에서 두 개의 파일을 모두 업로드해주세요.")
+    st.info("왼쪽 상단에서 두 개의 파일과 비밀번호를 모두 입력해주세요.")
