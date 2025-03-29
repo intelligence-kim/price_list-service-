@@ -1,7 +1,7 @@
 # app.py
 import streamlit as st
 import pandas as pd
-import msoffcrypto
+# import msoffcrypto
 from io import BytesIO
 import re
 
