@@ -1,6 +1,7 @@
 # app.py
 import streamlit as st
 import pandas as pd
+import msoffcrypto
 from io import BytesIO
 import re
 
@@ -10,9 +11,18 @@ st.title("📊 총원장 & 단가표 분석기")
 # 엑셀 파일 업로드
 col1, col2 = st.columns(2)
 with col1:
-    encrypted_file = st.file_uploader("🔐 총원장 파일 업로드 (.xlsx, 비밀번호 제거된 파일)", type=["xlsx"])
+    encrypted_file = st.file_uploader("🔐 총원장 파일 업로드 (.xlsx, 암호: 4698)", type=["xlsx"])
 with col2:
     price_file = st.file_uploader("💰 도매 단가표 업로드 (.xlsx)", type=["xlsx"])
+
+@st.cache_data
+def decrypt_excel(uploaded_file, password):
+    office_file = msoffcrypto.OfficeFile(uploaded_file)
+    office_file.load_key(password=password)
+    decrypted = BytesIO()
+    office_file.decrypt(decrypted)
+    df = pd.read_excel(decrypted)
+    return df
 
 @st.cache_data
 def read_excel(uploaded_file):
@@ -24,7 +34,7 @@ def extract_code(product_name):
 
 if encrypted_file and price_file:
     try:
-        df_ledger = read_excel(encrypted_file)  # 비밀번호 제거된 엑셀만 가능
+        df_ledger = decrypt_excel(encrypted_file, "4698")
         df_price = read_excel(price_file)
 
         # 상품코드 추출
@@ -56,6 +66,6 @@ if encrypted_file and price_file:
             st.dataframe(result, use_container_width=True, height=400)
 
     except Exception as e:
-        st.error(f"❌ 오류 발생: {e}")
+        st.error(f"오류 발생: {e}")
 else:
-    st.info("📂 왼쪽 상단에서 두 개의 파일을 모두 업로드해주세요.")
+    st.info("왼쪽 상단에서 두 개의 파일을 모두 업로드해주세요.")
